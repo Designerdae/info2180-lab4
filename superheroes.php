@@ -65,8 +65,41 @@ $superheroes = [
 
 ?>
 
-<ul>
-<?php foreach ($superheroes as $superhero): ?>
-  <li><?= $superhero['alias']; ?></li>
-<?php endforeach; ?>
-</ul>
+<?php 
+
+function retrieveHeroData($superheroes, $formData){
+    
+    foreach($superheroes as $superhero){
+
+        if($formData == strtolower($superhero['name']) || $formData == strtolower($superhero['alias'])){
+            return $superhero;
+        }
+    
+    }   
+    return "Superhero not found";
+}
+
+function processFormData($superheroes){
+ 
+    $data = $_GET['query'];
+    if($data == ''){
+        $line = '';
+        $line .= "<ul>";
+        foreach ($superheroes as $superhero):
+            $line .= "<li>{$superhero['alias']}</li>";
+        endforeach;
+        $line .= "</ul>";
+        echo $line;
+    }else{
+        
+        $sanitizedData = trim(filter_var($data, FILTER_SANITIZE_STRING));
+        $heroData = retrieveHeroData($superheroes, strtolower($sanitizedData));
+        
+        echo json_encode($heroData);
+    }
+}
+
+processFormData($superheroes)
+    
+
+?>
