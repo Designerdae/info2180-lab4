@@ -4,51 +4,29 @@ window.addEventListener('load', function(){
 });
 
 
-function displayHeroData(heroData, targetDiv){
-    
-    if(targetDiv.innerHTML !== ''){
-        targetDiv.innerHTML = '';
-    }
-   
-    if(typeof(heroData) !== 'string'){
-        let nameHeader = document.createElement('h3');
-        let name = document.createTextNode(heroData.alias.toUpperCase());
-        nameHeader.appendChild(name);
-        targetDiv.appendChild(nameHeader);
-        let aliasHeader = document.createElement('h4');
-        let alias = document.createTextNode(`A.K.A ${heroData.name}`.toUpperCase());
-        aliasHeader.appendChild(alias);
-        targetDiv.appendChild(aliasHeader);
-        let biographyArea = document.createElement('p');
-        let biography = document.createTextNode(heroData.biography);
-        biographyArea.appendChild(biography);
-        targetDiv.appendChild(biographyArea);
-    }
-}
+function displayHeroData(heroData, targetDiv) {
+    const name = `<h3> ${heroData.alias.toUpperCase()} </h3>`;
+    const alias = `<h4> A.K.A ${heroData.name.toUpperCase()} </h4>`;
+    const biography = `<p> ${heroData.biography} </p>`;
+  
+    targetDiv.innerHTML = `${name} ${alias} ${biography}`;
+  }
 
 
-function insertErrorClass(data, targetDiv){
-    if(data.includes('Hero not found'.toLowerCase())){
-        targetDiv.classList.add('error');
-    }
-}
-
-function removeErrorClass(targetDiv){
+function displayHeroes(data){
+    targetDiv = document.querySelector("#result")
     if (targetDiv.classList.contains('error')) {
         targetDiv.classList.remove('error');
     }
-}
-
-function displayHeroes(data){
-    result = document.getElementById('result');
     
-    removeErrorClass(result);
     if(typeof(data) === 'string'){
         
-        insertErrorClass(data, result);
-        result.innerHTML = data;
+        if(data.includes('Hero not found'.toLowerCase())){
+            targetDiv.classList.add('error');
+        }
+        targetDiv.innerHTML = data;
     }else{
-        displayHeroData(data, result);
+        displayHeroData(data, targetDiv);
     }
 }
 
@@ -67,8 +45,13 @@ async function loadPHP(event){
     event.preventDefault();
     let form = document.getElementById('superhero');
     try{
-        const phpData = await fetchData(form.value);
-        const processedData = await handleJSON(phpData);
+        const phpData = await fetch(`superheroes.php?query=${form.value}`).then(
+            (response) => {
+              return response.text();
+            }
+          );
+
+        const processedData = await processdata(phpData);
         console.log(processedData);
         const heroes =  displayHeroes(processedData);
         }catch (error){
@@ -76,7 +59,7 @@ async function loadPHP(event){
         }
     }   
 
-function handleJSON(data){
+function processdata(data){
     try{
         let parsedData = JSON.parse(data);
         return parsedData;
